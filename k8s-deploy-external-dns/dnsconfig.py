@@ -1,4 +1,4 @@
-from .provider import OVHProvider
+from provider import OVHProvider
 
 
 class DNSConfig:
@@ -10,23 +10,9 @@ class DNSConfig:
 		self.record = record
 		chunk = str(record).rsplit(".", maxsplit=2)
 		if len(chunk) < 3:
-			raise Exception("I'm able to deply only subdomain")
+			raise Exception("I'm able to deploy only subdomain")
 		self.subdomain = chunk[0]
 		self.zonename = ".".join(chunk[1:])
-
-	@staticmethod
-	def build_from_ingress_rule(ingress_rule)->list:
-		auto_deploy = ingress_rule.metadata.annotations.get("dns-autodeploy")
-		if auto_deploy not in [True,"true","True","yes", "1", 1]:
-			return []
-		target = ingress_rule.metadata.annotations.get("dns-target")
-		provider = ingress_rule.metadata.annotations.get("dns-provider")
-		dns_config_list = []
-		rules = ingress_rule.spec.rules
-		for rule in rules:
-			dns_config = DNSConfig(target=target, provider=provider, record=rule.host)
-			dns_config_list.append(dns_config)
-		return dns_config_list
 
 	def deploy(self):
 		self.provider.deploy_record(zonename=self.zonename, subdomain=self.subdomain, target=self.target)
