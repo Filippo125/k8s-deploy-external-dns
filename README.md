@@ -29,6 +29,6 @@ kubectl apply -f  https://raw.githubusercontent.com/Filippo125/k8s-deploy-extern
 * [OVH Client](https://pypi.org/project/ovh/) - Api to talk with dns in OVH
 * [PyTZ](https://pypi.org/project/pytz/)
 ## Authors
-* **Filippo Ferrazini** - *Initial work* - [PurpleBooth](https://github.com/Filippo12)
+* **Filippo Ferrazini** - *Initial work* - https://github.com/Filippo12
 ## License
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.txt) file for details
