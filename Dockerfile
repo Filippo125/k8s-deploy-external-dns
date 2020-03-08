@@ -5,4 +5,4 @@ WORKDIR /source
 COPY k8s-deploy-external-dns .
 COPY requirements.txt .
 RUN pip install -r requirements.txt
-CMD ['python',' main.py']
+CMD ["python","main.py"]
