@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: k8s-deploy-external-dns
+    component: executor
+  name: dns-deployer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: k8s-deploy-external-dns
+      component: executor
+  template:
+    metadata:
+      labels:
+        app: k8s-deploy-external-dns
+        component: executor
+    spec:
+      containers:
+      - name: executor
+        image: filippo125/k8s-deploy-external-dns:1.0
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+        args:
+        - --k8s-config-file="/key/k8s.config"
+        - --dns-provider="ovh"
+        - --dns-config-file="/key/ovh.key"
+        volumeMounts:
+        - mountPath: /key
+          name: configuration
+      volumes:
+      - name: configuration
+        secret:
+          secretName: k8s-deploy-secret

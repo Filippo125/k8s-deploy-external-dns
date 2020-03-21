@@ -8,8 +8,9 @@ from kubernetes import client, watch
 
 class IngressRuleWatcher:
 
-	def __init__(self,api_client,**kwargs):
+	def __init__(self, dns_config, api_client, **kwargs):
 		self.v1_extensions = client.ExtensionsV1beta1Api(api_client)
+		self.dns_config = dns_config
 		if "logger" in kwargs:
 			self.logger = kwargs.get("logger")
 		else:
@@ -23,7 +24,7 @@ class IngressRuleWatcher:
 			self.logger = logger
 		self.dry_run = kwargs.get("dry_run", False)
 		if self.dry_run:
-			self.logger.info("Dry Run mode activated, deploy on DNS")
+			self.logger.info("Dry Run mode activated, fake deploy on DNS")
 		self.start_time = datetime.utcnow().replace(tzinfo=pytz.UTC)
 		self.logger.info("All events before %s will be ignored" % (self.start_time.strftime("%d/%m/%y %H:%M")))
 		self.stop = False
@@ -64,8 +65,7 @@ class IngressRuleWatcher:
 				if not self.dry_run:
 					dnsConfig.delete()
 
-	@staticmethod
-	def _build_dns_config_list(ingress_rule) -> list:
+	def _build_dns_config_list(self, ingress_rule) -> list:
 		auto_deploy = ingress_rule.metadata.annotations.get("dns-autodeploy")
 		if auto_deploy not in [True,"true","True","yes", "1", 1]:
 			return []
@@ -74,6 +74,6 @@ class IngressRuleWatcher:
 		dns_config_list = []
 		rules = ingress_rule.spec.rules
 		for rule in rules:
-			dns_config = DNSConfig(target=target, provider=provider, record=rule.host)
+			dns_config = DNSConfig(target=target, provider=provider, record=rule.host, config=self.dns_config.get(provider, None))
 			dns_config_list.append(dns_config)
 		return dns_config_list

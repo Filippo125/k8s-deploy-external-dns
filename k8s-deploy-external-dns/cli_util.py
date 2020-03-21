@@ -32,7 +32,7 @@ def parse_cli():
 	parser.add_argument('--k8s-ssl-verify', dest='k8s_ssl_verify', metavar='B', default=None, type=bool,
 	                    help='Kubernetes verify ssl')
 
-	parser.add_argument('--dns-provider', dest='dns_provider', metavar='S', type=str, help='External DNS provider')
+	parser.add_argument('--dns-provider', dest='dns_provider', metavar='S',default="ovh", type=str, help='External DNS provider')
 	parser.add_argument('--dns-config-file', dest='dns_config_file', metavar='S', type=str, help='DNS configuration file')
 
 	parser.add_argument('--dry-run', dest='dry_run', type=bool, nargs='?', default=False, help='Fake deploy dns')

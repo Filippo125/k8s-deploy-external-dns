@@ -2,6 +2,8 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: depdns-read-only
+  labels:
+    app: k8s-deploy-external-dns
   annotations:
     rbac.authorization.kubernetes.io/autoupdate: "true"
 rules:

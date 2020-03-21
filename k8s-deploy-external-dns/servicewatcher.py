@@ -7,8 +7,9 @@ from kubernetes import client, watch
 
 class ServiceWatcher:
 
-	def __init__(self,api_client,**kwargs):
+	def __init__(self, dns_config, api_client, **kwargs):
 		self.v1_api = client.CoreV1Api(api_client)
+		self.dns_config = dns_config
 		if "logger" in kwargs:
 			self.logger = kwargs.get("logger")
 		else:
@@ -22,7 +23,7 @@ class ServiceWatcher:
 			self.logger = logger
 		self.dry_run = kwargs.get("dry_run", False)
 		if self.dry_run:
-			self.logger.info("Dry Run mode activated, deploy on DNS")
+			self.logger.info("Dry Run mode activated, fake deploy on DNS")
 		self.start_time = datetime.utcnow().replace(tzinfo=pytz.UTC)
 		self.logger.info("All events before %s will be ignored" % (self.start_time.strftime("%d/%m/%y %H:%M")))
 		self.stop = False
@@ -63,8 +64,7 @@ class ServiceWatcher:
 				if not self.dry_run:
 					dnsConfig.delete()
 
-	@staticmethod
-	def _build_dns_config_list(service) -> list:
+	def _build_dns_config_list(self, service) -> list:
 		auto_deploy = service.metadata.annotations.get("dns-autodeploy")
 		if auto_deploy not in [True, "true", "True", "yes", "1", 1]:
 			return []
@@ -75,6 +75,6 @@ class ServiceWatcher:
 		provider = service.metadata.annotations.get("dns-provider")
 		fqdn = service.metadata.annotations.get("dns-fqdn")
 		dns_config_list = []
-		dns_config = DNSConfig(target=target, provider=provider, record=fqdn)
+		dns_config = DNSConfig(target=target, provider=provider, record=fqdn, config=self.dns_config.get(provider, None))
 		dns_config_list.append(dns_config)
 		return dns_config_list

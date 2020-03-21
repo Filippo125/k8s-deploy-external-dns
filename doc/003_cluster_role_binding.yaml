@@ -2,6 +2,8 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: depdns-read-only-binding
+  labels:
+    app: k8s-deploy-external-dns
 subjects:
 - kind: ServiceAccount
   name: depdnssa

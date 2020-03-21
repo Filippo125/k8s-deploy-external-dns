@@ -45,11 +45,14 @@ if __name__ == "__main__":
 	# Create a ApiClient with our config
 	api_client = client.ApiClient(k8s_configuration)
 
-	ingress_rule_watcher = IngressRuleWatcher(api_client=api_client,logger=get_logger("ingress-rule-watcher",LOG_LEVEL), dry_run=args.dry_run)
-	service_watcher = ServiceWatcher(api_client=api_client,logger=get_logger("service-watcher",LOG_LEVEL), dry_run=args.dry_run)
+	# Create DNS Config dictionary
+	dns_config = {}
+	dns_config[args.dns_provider] = args.dns_config_file
+
+	ingress_rule_watcher = IngressRuleWatcher(dns_config=dns_config,api_client=api_client,logger=get_logger("ingress-rule-watcher",LOG_LEVEL), dry_run=args.dry_run)
+	service_watcher = ServiceWatcher(dns_config=dns_config,api_client=api_client,logger=get_logger("service-watcher",LOG_LEVEL), dry_run=args.dry_run)
+
 	loop = asyncio.get_event_loop()
-#	ingress_rule_watcher_task = loop.create_task(loop.run_in_executor(executor, ingress_rule_watcher.run))
-#	service_watcher_task = loop.create_task(loop.run_in_executor(executor, service_watcher.run))
 	loop.run_in_executor(None, ingress_rule_watcher.run)
 	loop.run_in_executor(None, service_watcher.run)
 

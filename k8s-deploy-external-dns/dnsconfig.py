@@ -3,9 +3,9 @@ from provider import OVHProvider
 
 class DNSConfig:
 
-	def __init__(self, record, target, provider):
+	def __init__(self, record, target, provider, config):
 		if provider == "ovh":
-			self.provider = OVHProvider(config_file="ovh.key")
+			self.provider = OVHProvider(config_file=config)
 		self.target = target
 		self.record = record
 		chunk = str(record).rsplit(".", maxsplit=2)
