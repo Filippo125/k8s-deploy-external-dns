@@ -5,6 +5,8 @@ from cli_util import parse_cli, get_logger
 from ingressrulewatcher import IngressRuleWatcher
 
 from kubernetes import client
+from kubernetes import config as k8s_config
+
 
 from servicewatcher import ServiceWatcher
 
@@ -33,24 +35,25 @@ if __name__ == "__main__":
 		k8s_ssl_verify = args.k8s_ssl_verify
 
 	if k8s_host is None or k8s_token is None:
-		logger.error("Kubernetes configuration not provider")
-		exit()
+		logger.info("Use Kubernetes in cluster configuration")
+		k8s_config.load_incluster_config()
+		api_client = client.ApiClient()
+	else:
+		# Create a configuration object
+		k8s_configuration = client.Configuration()
+		k8s_configuration.host = k8s_host
+		k8s_configuration.verify_ssl = k8s_ssl_verify
+		k8s_configuration.api_key = {"authorization": "Bearer " + k8s_token}
+		# Create a ApiClient with custom config
+		api_client = client.ApiClient(k8s_configuration)
 
-	# Create a configuration object
-	k8s_configuration = client.Configuration()
-	k8s_configuration.host = k8s_host
-	k8s_configuration.verify_ssl = k8s_ssl_verify
-	k8s_configuration.api_key = {"authorization": "Bearer " + k8s_token}
-
-	# Create a ApiClient with our config
-	api_client = client.ApiClient(k8s_configuration)
 
 	# Create DNS Config dictionary
 	dns_config = {}
 	dns_config[args.dns_provider] = args.dns_config_file
 
-	ingress_rule_watcher = IngressRuleWatcher(dns_config=dns_config,api_client=api_client,logger=get_logger("ingress-rule-watcher",LOG_LEVEL), dry_run=args.dry_run)
-	service_watcher = ServiceWatcher(dns_config=dns_config,api_client=api_client,logger=get_logger("service-watcher",LOG_LEVEL), dry_run=args.dry_run)
+	ingress_rule_watcher = IngressRuleWatcher(dns_config=dns_config, api_client=api_client, logger=get_logger("ingress-rule-watcher", LOG_LEVEL), dry_run=args.dry_run)
+	service_watcher = ServiceWatcher(dns_config=dns_config, api_client=api_client, logger=get_logger("service-watcher", LOG_LEVEL), dry_run=args.dry_run)
 
 	loop = asyncio.get_event_loop()
 	loop.run_in_executor(None, ingress_rule_watcher.run)
